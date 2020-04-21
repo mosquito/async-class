@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="async-class",
-    version="0.0.2",
+    version="0.0.3",
     description="Write classes with async def __ainit__",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
