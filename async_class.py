@@ -4,6 +4,14 @@ import typing
 from collections.abc import Awaitable
 
 
+def is_async_class_wrapper(obj):
+    return hasattr(obj, "__is_async_class_wrapper__")
+
+
+def unwrap_async_class(obj):
+    return getattr(obj, "__async_class__")
+
+
 class TasksStore:
     def __init__(self):
         self.tasks = set()
@@ -14,7 +22,7 @@ class TasksStore:
 
     def get_child(self):
         store = self.__class__()
-        self.children.append(store)
+        self.children.add(store)
         return store
 
     @property
@@ -80,8 +88,8 @@ class AsyncClassMeta(abc.ABCMeta):
     def __new__(cls, clsname, superclasses, attributedict):
         real_superclasses = []
         for superclass in superclasses:
-            if hasattr(superclass, "__is_async_class_wrapper__"):
-                superclass = superclass.__async_class__
+            if is_async_class_wrapper(superclass):
+                superclass = unwrap_async_class(superclass)
 
             real_superclasses.append(superclass)
 

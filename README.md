@@ -1,6 +1,8 @@
 async-class
 ===========
 
+![PyPI - License](https://img.shields.io/pypi/l/async-class) ![Wheel](https://img.shields.io/pypi/wheel/async-class) ![PyPI](https://img.shields.io/pypi/v/async-class) ![PyPI](https://img.shields.io/pypi/pyversions/async-class)
+
 Adding abillity to write classes with awaitable initialization function.
 
 
