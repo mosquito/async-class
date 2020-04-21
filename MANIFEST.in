@@ -1,0 +1,4 @@
+exclude .*
+
+include README.rst
+include *.pyi
