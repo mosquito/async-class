@@ -33,5 +33,9 @@ jobs:
     - name: Test with pytest
       run: |
         pip install -Ue .
-        pip install pytest aiomisc
+        pip install pytest aiomisc pytest-cov coveralls
         pytest
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
