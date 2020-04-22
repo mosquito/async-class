@@ -35,18 +35,69 @@ asyncio.run(main())
 Documentation
 =============
 
-Module provides metaclasses and some usefule abstractions for writing async code.
+Module provides useful abstractions for writing async code.
 
 
-TaskStore
----------
+`TaskStore`
+-----------
 
-TBD
+`TaskStore` is a task management helper. One instance has `create_task()`
+and `create_future()` methods and all created entities will be destroyed
+when `TaskStore` will be closed via `close()` method.
+
+Also, a task store might create a linked copy of the self, which will be
+closed when the parent instance will be closed.
+
+
+```python
+import asyncio
+from async_class import TaskStore
+
+
+async def main():
+    store = TaskStore()
+    task1 = store.create_task(asyncio.sleep(3600))
+
+    child_store = store.get_child()
+    task2 = child_store.create_task(asyncio.sleep(3600))
+
+    await store.close()
+
+    assert task1.done() and task2.done()
+
+
+asyncio.run(main())
+
+```
 
 AsyncClass
 ----------
 
 Base class with task store instance and helpers for simple task management.
+
+```python
+
+import asyncio
+from async_class import AsyncClass
+
+
+class MyClass(AsyncClass):
+    def __ainit__(self):
+        self.task = self.create_task(asyncio.sleep(3600))
+
+
+async def main():
+    obj = await MyClass()
+
+    assert not obj.task.done()
+
+    await obj.close()
+
+    assert obj.task.done()
+
+
+asyncio.run(main())
+```
 
 AsyncClassBase
 --------------

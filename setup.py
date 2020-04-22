@@ -3,11 +3,11 @@ from setuptools import setup
 
 setup(
     name="async-class",
-    version="0.0.3",
+    version="0.1.0",
     description="Write classes with async def __ainit__",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    license='MIT',
+    license="MIT",
     packages=["."],
     project_urls={"Source": "https://github.com/mosquito/async-class"},
     classifiers=[

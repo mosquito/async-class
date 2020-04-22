@@ -1,18 +1,9 @@
 import abc
 import asyncio
 import typing
-from collections.abc import Awaitable
 
 
-def is_async_class_wrapper(obj):
-    return hasattr(obj, "__is_async_class_wrapper__")
-
-
-def unwrap_async_class(obj):
-    return getattr(obj, "__async_class__")
-
-
-class TasksStore:
+class TaskStore:
     def __init__(self):
         self.tasks = set()
         self.futures = set()
@@ -43,6 +34,10 @@ class TasksStore:
         future.add_done_callback(self.futures.remove)
         return future
 
+    @property
+    def closed(self):
+        return self.__closed
+
     def close(self) -> typing.Coroutine:
         if self.__closed:
             raise asyncio.InvalidStateError("%r already closed")
@@ -52,6 +47,7 @@ class TasksStore:
         for future in self.futures:
             if future.done():
                 continue
+
             future.set_exception(
                 asyncio.CancelledError("Object %r closed" % self)
             )
@@ -61,11 +57,12 @@ class TasksStore:
         for task in self.tasks:
             if task.done():
                 continue
+
             task.cancel()
             tasks.append(task)
 
         for store in self.children:
-            tasks.append(store.close())
+            tasks.append(asyncio.ensure_future(store.close()))
 
         async def closer():
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -74,53 +71,35 @@ class TasksStore:
 
 
 class AsyncClassMeta(abc.ABCMeta):
-    @staticmethod
-    def wrapper_init(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
-
-    @staticmethod
-    def wrapper_await(self):
-        instance = self.__async_class__(*self._args, **self._kwargs)
-        yield from instance.__ainit__(*self._args, **self._kwargs).__await__()
-        return instance
-
     def __new__(cls, clsname, superclasses, attributedict):
-        real_superclasses = []
-        for superclass in superclasses:
-            if is_async_class_wrapper(superclass):
-                superclass = unwrap_async_class(superclass)
+        if "__await__" in attributedict and superclasses:
+            raise TypeError("__await__ redeclaration is forbidden")
 
-            real_superclasses.append(superclass)
-
-        async_instance = super(AsyncClassMeta, cls).__new__(
-            cls, clsname, tuple(real_superclasses), attributedict
+        instance = super(AsyncClassMeta, cls).__new__(
+            cls, clsname, superclasses, attributedict
         )
 
-        if not asyncio.iscoroutinefunction(async_instance.__ainit__):
+        if not asyncio.iscoroutinefunction(instance.__ainit__):
             raise TypeError("__ainit__ must be coroutine")
 
-        wrapper_attributes = {
-            "__is_async_class_wrapper__": True,
-            "__async_class__": async_instance,
-            "__await__": cls.wrapper_await,
-            "__init__": cls.wrapper_init,
-        }
-
-        class_wrapper = super(AsyncClassMeta, cls).__new__(
-            cls, clsname + "AsyncWrapper", (async_instance,),
-            wrapper_attributes,
-        )
-
-        return class_wrapper
+        return instance
 
 
-class AsyncClassBase(Awaitable, metaclass=AsyncClassMeta):
-    async def __ainit__(self):
-        pass
+class AsyncClassBase(metaclass=AsyncClassMeta):
+    __slots__ = ("_args", "_kwargs")
+
+    def __new__(cls, *args, **kwargs):
+        self = super().__new__(cls)
+        self._args = args
+        self._kwargs = kwargs
+        return self
 
     def __await__(self):
-        return
+        yield from self.__ainit__(*self._args, **self._kwargs).__await__()
+        return self
+
+    async def __ainit__(self):
+        pass
 
 
 class AsyncClass(AsyncClassBase):
@@ -128,8 +107,10 @@ class AsyncClass(AsyncClassBase):
     def loop(self) -> asyncio.AbstractEventLoop:
         return self.__tasks__.loop
 
-    def __init__(self):
-        self.__tasks__ = TasksStore()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__tasks__ = TaskStore()
+        self.__closed = False
 
     def create_task(self, *args, **kwargs) -> asyncio.Task:
         return self.__tasks__.create_task(*args, **kwargs)
@@ -141,9 +122,17 @@ class AsyncClass(AsyncClassBase):
         pass
 
     def __del__(self):
+        if self.__closed:
+            return
+
         self.close()
 
     def close(self) -> asyncio.Task:
+        if self.__closed:
+            raise asyncio.InvalidStateError
+
+        self.__closed = True
+
         async def closer():
             done, _ = await asyncio.wait(
                 [self.__adel__(), self.__tasks__.close()],
@@ -152,4 +141,11 @@ class AsyncClass(AsyncClassBase):
             for task in done:
                 task.result()
 
-        return self.loop.create_task(closer())
+        return asyncio.get_event_loop().create_task(closer())
+
+
+__all__ = (
+    "AsyncClass",
+    "AsyncClassBase",
+    "TaskStore",
+)
