@@ -49,7 +49,7 @@ class TaskStore:
                 continue
 
             future.set_exception(
-                asyncio.CancelledError("Object %r closed" % self)
+                asyncio.CancelledError("Object %r closed" % self),
             )
 
         tasks = []
@@ -76,7 +76,7 @@ class AsyncClassMeta(abc.ABCMeta):
             raise TypeError("__await__ redeclaration is forbidden")
 
         instance = super(AsyncClassMeta, cls).__new__(
-            cls, clsname, superclasses, attributedict
+            cls, clsname, superclasses, attributedict,
         )
 
         if not asyncio.iscoroutinefunction(instance.__ainit__):
