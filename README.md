@@ -38,8 +38,8 @@ Documentation
 Module provides useful abstractions for writing async code.
 
 
-`TaskStore`
------------
+TaskStore
+---------
 
 `TaskStore` is a task management helper. One instance has `create_task()`
 and `create_future()` methods and all created entities will be destroyed
