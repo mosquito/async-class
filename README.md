@@ -1,7 +1,7 @@
 async-class
 ===========
 
-[![PyPI - License](https://img.shields.io/pypi/l/async-class)](https://pypi.org/project/async-class) [![Wheel](https://img.shields.io/pypi/wheel/async-class)](https://pypi.org/project/async-class) [![PyPI](https://img.shields.io/pypi/v/async-class)](https://pypi.org/project/async-class) [![PyPI](https://img.shields.io/pypi/pyversions/async-class)](https://pypi.org/project/async-class) [![Coverage Status](https://coveralls.io/repos/github/mosquito/async-class/badge.svg?branch=master)](https://coveralls.io/github/mosquito/async-class?branch=master) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mosquito/async-class/Python package)](https://github.com/mosquito/async-class/actions?query=workflow%3A%22Python+package%22)
+[![PyPI - License](https://img.shields.io/pypi/l/async-class)](https://pypi.org/project/async-class) [![Wheel](https://img.shields.io/pypi/wheel/async-class)](https://pypi.org/project/async-class) [![PyPI](https://img.shields.io/pypi/v/async-class)](https://pypi.org/project/async-class) [![PyPI](https://img.shields.io/pypi/pyversions/async-class)](https://pypi.org/project/async-class) [![Coverage Status](https://coveralls.io/repos/github/mosquito/async-class/badge.svg?branch=master)](https://coveralls.io/github/mosquito/async-class?branch=master) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mosquito/async-class/Python%20package)](https://github.com/mosquito/async-class/actions?query=workflow%3A%22Python+package%22)
 
 Adding abillity to write classes with awaitable initialization function.
 
