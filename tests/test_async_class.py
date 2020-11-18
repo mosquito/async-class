@@ -118,8 +118,8 @@ async def test_async_class_task_store():
     assert obj.future.done()
     assert obj.task.done()
 
-    with pytest.raises(asyncio.InvalidStateError):
-        await obj.close()
+    assert obj.is_closed
+    await obj.close()
 
     del obj
 
