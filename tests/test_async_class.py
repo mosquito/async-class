@@ -122,3 +122,19 @@ async def test_async_class_task_store():
         await obj.close()
 
     del obj
+
+
+async def test_async_class_inherit_from():
+    class Parent(AsyncClass):
+        pass
+
+    class Child(Parent):
+        async def __ainit__(self, parent: Parent):
+            self._link_to(parent)
+
+    parent = await Parent()
+    child = await Child(parent)
+
+    assert not child.is_closed
+    await parent.close()
+    assert child.is_closed

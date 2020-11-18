@@ -8,18 +8,21 @@ class TaskStore:
         self.tasks = set()
         self.futures = set()
         self.children = set()
-        self.__loop = None
-        self.__closed = False
+        self.__loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        self.__closing: asyncio.Future = self.__loop.create_future()
 
-    def get_child(self):
+    def get_child(self) -> "TaskStore":
         store = self.__class__()
         self.children.add(store)
         return store
 
+    def add_close_callback(
+        self, func: typing.Callable[[], typing.Any],
+    ) -> None:
+        self.__closing.add_done_callback(lambda x: func())
+
     @property
-    def loop(self):
-        if self.__loop is None:
-            self.__loop = asyncio.get_event_loop()
+    def loop(self) -> asyncio.AbstractEventLoop:
         return self.__loop
 
     def create_task(self, *args, **kwargs) -> asyncio.Task:
@@ -28,21 +31,21 @@ class TaskStore:
         task.add_done_callback(self.tasks.remove)
         return task
 
-    def create_future(self):
+    def create_future(self) -> asyncio.Future:
         future = self.loop.create_future()
         self.futures.add(future)
         future.add_done_callback(self.futures.remove)
         return future
 
     @property
-    def closed(self):
-        return self.__closed
+    def is_closed(self) -> bool:
+        return self.__closing.done()
 
     def close(self) -> typing.Coroutine:
-        if self.__closed:
-            raise asyncio.InvalidStateError("%r already closed")
+        if self.__closing.done():
+            raise asyncio.InvalidStateError("%r already closed", self)
 
-        self.__closed = True
+        self.__closing.set_result(True)
 
         for future in self.futures:
             if future.done():
@@ -98,7 +101,7 @@ class AsyncClassBase(metaclass=AsyncClassMeta):
         yield from self.__ainit__(*self._args, **self._kwargs).__await__()
         return self
 
-    async def __ainit__(self, *args, **kwargs):
+    async def __ainit__(self, *args, **kwargs) -> typing.NoReturn:
         pass
 
 
@@ -108,7 +111,6 @@ class AsyncClass(AsyncClassBase):
         return self.__tasks__.loop
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.__tasks = TaskStore()
         self.__closed = False
 
@@ -116,34 +118,42 @@ class AsyncClass(AsyncClassBase):
     def __tasks__(self) -> TaskStore:
         return self.__tasks
 
+    @property
+    def is_closed(self) -> bool:
+        return self.__closed
+
+    def _link_to(self, parent: "AsyncClass") -> None:
+        self.__tasks = parent.__tasks__.get_child()
+        self.__tasks__.add_close_callback(self.close)
+
     def create_task(self, *args, **kwargs) -> asyncio.Task:
         return self.__tasks__.create_task(*args, **kwargs)
 
-    def create_future(self):
+    def create_future(self) -> asyncio.Future:
         return self.__tasks__.create_future()
 
-    async def __adel__(self):
+    async def __adel__(self) -> None:
         pass
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.__closed:
             return
 
         self.close()
 
-    def close(self) -> asyncio.Task:
+    def close(self) -> asyncio.Future:
         if self.__closed:
-            raise asyncio.InvalidStateError
+            f = asyncio.get_event_loop().create_future()
+            f.set_result(True)
+            return f
 
         self.__closed = True
 
         async def closer():
-            done, _ = await asyncio.wait(
-                [self.__adel__(), self.__tasks__.close()],
-                return_when=asyncio.ALL_COMPLETED,
+            await asyncio.gather(
+                self.loop.create_task(self.__adel__()),
+                self.loop.create_task(self.__tasks__.close()),
             )
-            for task in done:
-                task.result()
 
         return asyncio.get_event_loop().create_task(closer())
 

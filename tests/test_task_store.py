@@ -30,7 +30,7 @@ async def test_store_close(loop):
     await asyncio.sleep(0.1)
 
     await store.close()
-    assert store.closed
+    assert store.is_closed
 
     with pytest.raises(asyncio.InvalidStateError):
         await store.close()

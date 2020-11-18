@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="async-class",
-    version="0.2.0",
+    version="0.3.0",
     description="Write classes with async def __ainit__",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -21,7 +21,6 @@ setup(
         "Operating System :: POSIX",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
