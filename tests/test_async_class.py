@@ -2,7 +2,7 @@ import asyncio
 
 import pytest
 
-from async_class import AsyncClass
+from async_class import AsyncClass, TaskStore
 
 
 async def test_simple():
@@ -106,6 +106,10 @@ async def test_async_class_task_store():
             self.task = self.create_task(asyncio.sleep(3600))
 
     obj = await Sample()
+
+    assert obj.__tasks__
+    assert isinstance(obj.__tasks__, TaskStore)
+
     assert not obj.future.done()
     assert not obj.task.done()
 

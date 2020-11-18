@@ -98,7 +98,7 @@ class AsyncClassBase(metaclass=AsyncClassMeta):
         yield from self.__ainit__(*self._args, **self._kwargs).__await__()
         return self
 
-    async def __ainit__(self):
+    async def __ainit__(self, *args, **kwargs):
         pass
 
 
@@ -109,8 +109,12 @@ class AsyncClass(AsyncClassBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__tasks__ = TaskStore()
+        self.__tasks = TaskStore()
         self.__closed = False
+
+    @property
+    def __tasks__(self) -> TaskStore:
+        return self.__tasks
 
     def create_task(self, *args, **kwargs) -> asyncio.Task:
         return self.__tasks__.create_task(*args, **kwargs)
