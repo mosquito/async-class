@@ -18,7 +18,7 @@ from async_class import AsyncClass
 class MyAsyncClass(AsyncClass):
     async def __ainit__(self):
         future = self.create_future()
-        self.loop.call_soon(future.set_result)
+        self.loop.call_soon(future.set_result, True)
         await future
 
 
@@ -116,7 +116,7 @@ class MyAsyncClass(AsyncClassBase):
     async def __ainit__(self):
         loop = asyncio.get_event_loop()
         future = loop.create_future()
-        loop.call_soon(future.set_result)
+        loop.call_soon(future.set_result, True)
         await future
 
 
