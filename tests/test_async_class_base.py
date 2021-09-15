@@ -1,8 +1,17 @@
 import asyncio
 
-import pytest
-
 from async_class import AsyncClassBase
+
+
+class GlobalInitializedClass(AsyncClassBase):
+    pass
+
+
+global_initialized_instance = GlobalInitializedClass()
+
+
+async def test_global_initialized_instance(loop):
+    await global_initialized_instance
 
 
 async def test_simple():
@@ -91,11 +100,3 @@ async def test_simple_with_init_inheritance():
     assert Sample.event.is_set()
     assert MySample.event.is_set()
     assert instance.value == 3
-
-
-async def test_await_redeclaration():
-    with pytest.raises(TypeError):
-
-        class _(AsyncClassBase):
-            def __await__(self):
-                pass

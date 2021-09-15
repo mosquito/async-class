@@ -5,6 +5,18 @@ import pytest
 from async_class import AsyncClass, TaskStore
 
 
+class GlobalInitializedClass(AsyncClass):
+    pass
+
+
+global_initialized_instance = GlobalInitializedClass()
+
+
+async def test_global_initialized_instance(loop):
+    await global_initialized_instance
+    assert not global_initialized_instance.is_closed
+
+
 async def test_simple():
     await AsyncClass()
 
@@ -134,7 +146,40 @@ async def test_async_class_inherit_from():
 
     parent = await Parent()
     child = await Child(parent)
-
     assert not child.is_closed
     await parent.close()
+    assert parent.is_closed
+    assert parent.__tasks__.is_closed
+    assert child.__tasks__.is_closed
     assert child.is_closed
+
+
+async def test_await_redeclaration():
+    with pytest.raises(TypeError):
+
+        class _(AsyncClass):
+            def __await__(self):
+                pass
+
+
+# async def test_close_uninitialized(loop):
+#     class Sample(AsyncClass):
+#         future = asyncio.Future()
+#
+#         async def __ainit__(self, *args, **kwargs):
+#             try:
+#                 await self.future
+#             except BaseException:
+#                 self.future.set_result(14)
+#
+#     instance = Sample()
+#
+#     async def initializer():
+#         await instance
+#
+#     task: asyncio.Task = loop.create_task(initializer())
+#     await instance.close()
+#     assert task.done()
+#     assert task.cancelled()
+#     assert Sample.future.done()
+#     assert await Sample.future == 14
