@@ -4,18 +4,13 @@ import logging
 from contextlib import suppress
 from functools import wraps
 from typing import (
-    Any, Callable, Coroutine, Dict, Generator, List, MutableSet, Optional, Set,
-    Tuple, TypeVar, Union, NoReturn, Awaitable
+    Any, Awaitable, Callable, Coroutine, Dict, Generator, List, MutableSet,
+    NoReturn, Optional, Set, Tuple, TypeVar, Union,
 )
 from weakref import WeakSet
 
 
-try:
-    from asyncio import get_running_loop
-except ImportError:
-    from asyncio import get_event_loop as get_running_loop
-
-
+get_running_loop = getattr(asyncio, "get_running_loop", asyncio.get_event_loop)
 log = logging.getLogger(__name__)
 CloseCallbacksType = Callable[[], Union[Any, Coroutine]]
 
@@ -208,7 +203,7 @@ T = TypeVar("T")
 
 
 def task(
-    func: Callable[..., Coroutine[Any, None, T]]
+    func: Callable[..., Coroutine[Any, None, T]],
 ) -> Callable[..., Awaitable[T]]:
     @wraps(func)
     def wrap(
