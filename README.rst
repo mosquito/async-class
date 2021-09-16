@@ -1,63 +1,91 @@
 async-class
 ===========
 
-[![PyPI - License](https://img.shields.io/pypi/l/async-class)](https://pypi.org/project/async-class) [![Wheel](https://img.shields.io/pypi/wheel/async-class)](https://pypi.org/project/async-class) [![PyPI](https://img.shields.io/pypi/v/async-class)](https://pypi.org/project/async-class) [![PyPI](https://img.shields.io/pypi/pyversions/async-class)](https://pypi.org/project/async-class) [![Coverage Status](https://coveralls.io/repos/github/mosquito/async-class/badge.svg?branch=master)](https://coveralls.io/github/mosquito/async-class?branch=master) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mosquito/async-class/Python%20package)](https://github.com/mosquito/async-class/actions?query=workflow%3A%22Python+package%22)
+.. image:: https://coveralls.io/repos/github/mosquito/aiormq/badge.svg?branch=master
+   :target: https://coveralls.io/github/mosquito/async-class?branch=master
+   :alt: Coveralls
+
+.. image:: https://img.shields.io/pypi/status/async-class.svg
+   :target: https://github.com/mosquito/async-class
+   :alt: Status
+
+.. image:: https://github.com/mosquito/async-class/workflows/tox/badge.svg
+   :target: https://github.com/mosquito/async-class/actions?query=workflow%3Atox
+   :alt: Build status
+
+.. image:: https://img.shields.io/pypi/v/async-class.svg
+   :target: https://pypi.python.org/pypi/async-class/
+   :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/wheel/async-class.svg
+   :target: https://pypi.python.org/pypi/async-class/
+
+.. image:: https://img.shields.io/pypi/pyversions/async-class.svg
+   :target: https://pypi.python.org/pypi/async-class/
+
+.. image:: https://img.shields.io/pypi/l/async-class.svg
+   :target: https://github.com/mosquito/async-class/blob/master/LICENSE.md
+
+.. image:: https://img.shields.io/github/workflow/status/mosquito/async-class/Python%20package
+   :target: https://github.com/mosquito/async-class/actions?query=workflow%3A%22Python+package%22
 
 Adding abillity to write classes with awaitable initialization function.
-
 
 Example
 -------
 
-```python
-
-import asyncio
-from async_class import AsyncClass, AsyncClassStore, task, link
+.. code:: python
 
 
-class MyAsyncClass(AsyncClass):
-    async def __ainit__(self):
-        # Do async staff here
-        pass
+   import asyncio
+   from async_class import AsyncClass, AsyncClassStore, task, link
 
 
-class MainClass(AsyncClassStore):
-    async def __ainit__(self):
-        # Do async staff here
-        pass
-
-    async def __adel__(self):
-        """ This method will be called when object will be closed """
-        pass
+   class MyAsyncClass(AsyncClass):
+       async def __ainit__(self):
+           # Do async staff here
+           pass
 
 
-class RelatedClass(AsyncClassStore):
-    async def __ainit__(self, parent: MainClass):
-        link(self, parent)
+   class MainClass(AsyncClassStore):
+       async def __ainit__(self):
+           # Do async staff here
+           pass
+
+       async def __adel__(self):
+           """ This method will be called when object will be closed """
+           pass
 
 
-async def main():
-    instance = await MyAsyncClass()
-    print(instance)
-
-    main_instance = await MainClass()
-    related_instance = await RelatedClass(main_instance)
-
-    assert not main_instance.is_closed
-    assert not related_instance.is_closed
-
-    await main_instance.close()
-    assert not main_instance.is_closed
-
-    # will be closed because linked to closed main_instance
-    assert related_instance.is_closed
-
-asyncio.run(main())
-
-```
+   class RelatedClass(AsyncClassStore):
+       async def __ainit__(self, parent: MainClass):
+           link(self, parent)
 
 
-# Documentation
+   async def main():
+       instance = await MyAsyncClass()
+       print(instance)
+
+       main_instance = await MainClass()
+       related_instance = await RelatedClass(main_instance)
+
+       assert not main_instance.is_closed
+       assert not related_instance.is_closed
+
+       await main_instance.close()
+       assert not main_instance.is_closed
+
+       # will be closed because linked to closed main_instance
+       assert related_instance.is_closed
+
+   asyncio.run(main())
+
+
+.. contents:: Table of contents
+
+
+Documentation
+=============
 
 Async objects might be created when no one event loop has been running.
 ``self.loop`` property is lazily evaluated.
@@ -67,90 +95,93 @@ Module provides useful abstractions for writing async code.
 Objects inherited from ``AsyncClass`` might have their own ``__init__``
 method, but it strictly not recommend.
 
-## Class ``AsyncClass``
+Class ``AsyncClass``
+--------------------
 
-Is a base wrapper with metaclass has no ``TaskStore`` instance and additional
-methods like `self.create_task` and `self.create_future`.
+Is a base wrapper with metaclass has no ``TaskStore`` instance and
+additional methods like ``self.create_task`` and ``self.create_future``.
 
 This class just solves the initialization problem:
 
-```python
-
-import asyncio
-from async_class import AsyncClass
+.. code:: python
 
 
-class MyAsyncClass(AsyncClass):
-    async def __ainit__(self):
-        future = self.loop.create_future()
-        self.loop.call_soon(future.set_result)
-        await future
+   import asyncio
+   from async_class import AsyncClass
 
 
-async def main():
-    instance = await MyAsyncClass()
-    print(instance)
+   class MyAsyncClass(AsyncClass):
+       async def __ainit__(self):
+           future = self.loop.create_future()
+           self.loop.call_soon(future.set_result)
+           await future
 
 
-asyncio.run(main())
-```
+   async def main():
+       instance = await MyAsyncClass()
+       print(instance)
 
 
-## Class ``AsyncClassStore``
-Base class with task store instance and helpers for simple task management.
+   asyncio.run(main())
 
-```python
+Class ``AsyncClassStore``
+-------------------------
 
-import asyncio
-from async_class import AsyncClassStore
+Base class with task store instance and helpers for simple task
+management.
 
-
-class MyClass(AsyncClassStore):
-    def __ainit__(self):
-        self.task = self.create_task(asyncio.sleep(3600))
+.. code:: python
 
 
-async def main():
-    obj = await MyClass()
-
-    assert not obj.task.done()
-
-    await obj.close()
-
-    assert obj.task.done()
+   import asyncio
+   from async_class import AsyncClassStore
 
 
-asyncio.run(main())
-```
+   class MyClass(AsyncClassStore):
+       def __ainit__(self):
+           self.task = self.create_task(asyncio.sleep(3600))
 
-## TaskStore
 
-`TaskStore` is a task management helper. One instance has `create_task()`
-and `create_future()` methods and all created entities will be destroyed
-when `TaskStore` will be closed via `close()` method.
+   async def main():
+       obj = await MyClass()
+
+       assert not obj.task.done()
+
+       await obj.close()
+
+       assert obj.task.done()
+
+
+   asyncio.run(main())
+
+TaskStore
+---------
+
+``TaskStore`` is a task management helper. One instance has
+``create_task()`` and ``create_future()`` methods and all created
+entities will be destroyed when ``TaskStore`` will be closed via
+``close()`` method.
 
 Also, a task store might create a linked copy of the self, which will be
 closed when the parent instance will be closed.
 
+.. code:: python
 
-```python
-import asyncio
-from async_class import TaskStore
-
-
-async def main():
-    store = TaskStore(asyncio.get_event_loop())
-
-    task1 = store.create_task(asyncio.sleep(3600))
-
-    child_store = store.get_child()
-    task2 = child_store.create_task(asyncio.sleep(3600))
-
-    await store.close()
-
-    assert task1.done() and task2.done()
+   import asyncio
+   from async_class import TaskStore
 
 
-asyncio.run(main())
+   async def main():
+       store = TaskStore(asyncio.get_event_loop())
 
-```
+       task1 = store.create_task(asyncio.sleep(3600))
+
+       child_store = store.get_child()
+       task2 = child_store.create_task(asyncio.sleep(3600))
+
+       await store.close()
+
+       assert task1.done() and task2.done()
+
+
+   asyncio.run(main())

@@ -228,7 +228,10 @@ def link(who: AsyncClassStore, where: AsyncClassStore) -> None:
 
 
 __all__ = (
-    "AsyncClassStore",
     "AsyncClass",
+    "AsyncClassStore",
+    "CloseCallbacksType",
     "TaskStore",
+    "link",
+    "task",
 )
