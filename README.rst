@@ -1,6 +1,3 @@
-async-class
-===========
-
 .. image:: https://coveralls.io/repos/github/mosquito/aiormq/badge.svg?branch=master
    :target: https://coveralls.io/github/mosquito/async-class?branch=master
    :alt: Coveralls
@@ -20,6 +17,10 @@ async-class
 .. image:: https://img.shields.io/pypi/v/async-class
    :target: https://pypi.org/project/async-class
    :alt: Latest version
+
+
+async-class
+===========
 
 Adding abillity to write classes with awaitable initialization function.
 
