@@ -281,7 +281,7 @@ async def test_close_non_initialized():
     await sample.close()
 
 
-async def task_decorator():
+async def test_task_decorator():
     class Sample(AsyncObject):
         @task
         async def sleep(self, *args):
