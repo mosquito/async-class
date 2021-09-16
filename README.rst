@@ -23,8 +23,10 @@ async-class
 
 Adding abillity to write classes with awaitable initialization function.
 
-Example
--------
+.. contents:: Table of contents
+
+Usage example
+=============
 
 .. code:: python
 
@@ -71,9 +73,6 @@ Example
        assert related_instance.is_closed
 
    asyncio.run(main())
-
-
-.. contents:: Table of contents
 
 
 Documentation
@@ -146,8 +145,8 @@ management.
 
    asyncio.run(main())
 
-TaskStore
----------
+Class ``TaskStore``
+-------------------
 
 ``TaskStore`` is a task management helper. One instance has
 ``create_task()`` and ``create_future()`` methods and all created
