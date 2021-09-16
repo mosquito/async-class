@@ -162,24 +162,24 @@ async def test_await_redeclaration():
                 pass
 
 
-# async def test_close_uninitialized(loop):
-#     class Sample(AsyncClass):
-#         future = asyncio.Future()
-#
-#         async def __ainit__(self, *args, **kwargs):
-#             try:
-#                 await self.future
-#             except BaseException:
-#                 self.future.set_result(14)
-#
-#     instance = Sample()
-#
-#     async def initializer():
-#         await instance
-#
-#     task: asyncio.Task = loop.create_task(initializer())
-#     await instance.close()
-#     assert task.done()
-#     assert task.cancelled()
-#     assert Sample.future.done()
-#     assert await Sample.future == 14
+async def test_close_uninitialized(loop):
+    future = asyncio.Future()
+
+    class Sample(AsyncClass):
+        async def __ainit__(self, *args, **kwargs):
+            await future
+
+    instance = Sample()
+
+    task: asyncio.Task = loop.create_task(instance.__await__())
+    await asyncio.sleep(0.1)
+
+    await instance.close()
+
+    assert task.done()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+
+    assert future.done()
+    with pytest.raises(asyncio.CancelledError):
+        await future

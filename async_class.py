@@ -157,18 +157,18 @@ class AsyncClassBase(metaclass=AsyncClassMeta):
 class AsyncClass(AsyncClassBase):
     def __init__(self, *args: ArgsType, **kwargs: KwargsType):
         self.__closed = False
-        self.__tasks: TaskStore
+        self._async_class_task_store: TaskStore
 
     @property
     def __tasks__(self) -> TaskStore:
-        return self.__tasks
+        return self._async_class_task_store
 
     @property
     def is_closed(self) -> bool:
         return self.__closed
 
     def _link_to(self, parent: "AsyncClass") -> None:
-        self.__tasks = parent.__tasks__.get_child()
+        self._async_class_task_store = parent.__tasks__.get_child()
         self.__tasks__.add_close_callback(self.close)
 
     def create_task(
@@ -187,8 +187,8 @@ class AsyncClass(AsyncClassBase):
             raise TypeError("__await__ redeclaration is forbidden")
 
     def __await__(self) -> t.Generator[t.Any, None, "AsyncClass"]:
-        if not hasattr(self, "__tasks"):
-            self.__tasks = TaskStore(self.loop)
+        if not hasattr(self, "_async_class_task_store"):
+            self._async_class_task_store = TaskStore(self.loop)
 
         yield from self.create_task(
             self.__ainit__(*self._args, **self._kwargs)
@@ -203,7 +203,7 @@ class AsyncClass(AsyncClassBase):
     def close(self, exc: t.Optional[Exception] = None) -> t.Awaitable:
         tasks: t.List[t.Union[asyncio.Future, t.Coroutine]] = []
 
-        if not self.__closed:
+        if hasattr(self, "_async_class_task_store") and not self.__closed:
             tasks.append(self.__adel__())
             tasks.append(self.__tasks__.close(exc))
             self.__closed = True
