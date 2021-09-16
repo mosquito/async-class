@@ -33,7 +33,7 @@ Usage example
 
 
    import asyncio
-   from async_class import AsyncClass, AsyncClassStore, task, link
+   from async_class import AsyncClass, AsyncObject, task, link
 
 
    class MyAsyncClass(AsyncClass):
@@ -42,7 +42,7 @@ Usage example
            pass
 
 
-   class MainClass(AsyncClassStore):
+   class MainClass(AsyncObject):
        async def __ainit__(self):
            # Do async staff here
            pass
@@ -52,7 +52,7 @@ Usage example
            pass
 
 
-   class RelatedClass(AsyncClassStore):
+   class RelatedClass(AsyncObject):
        async def __ainit__(self, parent: MainClass):
            link(self, parent)
 
@@ -116,7 +116,7 @@ This class just solves the initialization problem:
 
    asyncio.run(main())
 
-Class ``AsyncClassStore``
+Class ``AsyncObject``
 -------------------------
 
 Base class with task store instance and helpers for simple task
@@ -126,10 +126,10 @@ management.
 
 
    import asyncio
-   from async_class import AsyncClassStore
+   from async_class import AsyncObject
 
 
-   class MyClass(AsyncClassStore):
+   class MyClass(AsyncObject):
        def __ainit__(self):
            self.task = self.create_task(asyncio.sleep(3600))
 

@@ -143,7 +143,7 @@ class AsyncClass(metaclass=AsyncClassMeta):
 
 
 # noinspection PyAttributeOutsideInit
-class AsyncClassStore(AsyncClass):
+class AsyncObject(AsyncClass):
     def __init__(self, *args: ArgsType, **kwargs: KwargsType):
         self.__closed = False
         self._async_class_task_store: TaskStore
@@ -168,10 +168,10 @@ class AsyncClassStore(AsyncClass):
         pass
 
     def __init_subclass__(cls, **kwargs: KwargsType):
-        if getattr(cls, "__await__") is not AsyncClassStore.__await__:
+        if getattr(cls, "__await__") is not AsyncObject.__await__:
             raise TypeError("__await__ redeclaration is forbidden")
 
-    def __await__(self) -> Generator[Any, None, "AsyncClassStore"]:
+    def __await__(self) -> Generator[Any, None, "AsyncObject"]:
         if not hasattr(self, "_async_class_task_store"):
             self._async_class_task_store = TaskStore(self.loop)
 
@@ -212,7 +212,7 @@ def task(
 ) -> Callable[..., Awaitable[T]]:
     @wraps(func)
     def wrap(
-        self: AsyncClassStore,
+        self: AsyncObject,
         *args: ArgsType,
         **kwargs: KwargsType
     ) -> Awaitable[T]:
@@ -222,14 +222,14 @@ def task(
     return wrap
 
 
-def link(who: AsyncClassStore, where: AsyncClassStore) -> None:
+def link(who: AsyncObject, where: AsyncObject) -> None:
     who._async_class_task_store = where.__tasks__.get_child()
     who.__tasks__.add_close_callback(who.close)
 
 
 __all__ = (
     "AsyncClass",
-    "AsyncClassStore",
+    "AsyncObject",
     "CloseCallbacksType",
     "TaskStore",
     "link",

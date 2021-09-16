@@ -3,10 +3,10 @@ import gc
 
 import pytest
 
-from async_class import AsyncClassStore, TaskStore, link, task
+from async_class import AsyncObject, TaskStore, link, task
 
 
-class GlobalInitializedClass(AsyncClassStore):
+class GlobalInitializedClass(AsyncObject):
     pass
 
 
@@ -19,11 +19,11 @@ async def test_global_initialized_instance(loop):
 
 
 async def test_simple():
-    await AsyncClassStore()
+    await AsyncObject()
 
 
 async def test_simple_class():
-    class Simple(AsyncClassStore):
+    class Simple(AsyncObject):
         event = asyncio.Event()
 
         async def __ainit__(self):
@@ -38,7 +38,7 @@ async def test_simple_class():
 
 
 async def test_simple_inheritance():
-    class Simple(AsyncClassStore):
+    class Simple(AsyncObject):
         event = asyncio.Event()
 
         async def __ainit__(self):
@@ -61,7 +61,7 @@ async def test_simple_inheritance():
 
 
 async def test_simple_with_init():
-    class Simple(AsyncClassStore):
+    class Simple(AsyncObject):
         event = asyncio.Event()
 
         def __init__(self):
@@ -81,7 +81,7 @@ async def test_simple_with_init():
 
 
 async def test_simple_with_init_inheritance():
-    class Simple(AsyncClassStore):
+    class Simple(AsyncObject):
         event = asyncio.Event()
 
         def __init__(self):
@@ -107,13 +107,13 @@ async def test_simple_with_init_inheritance():
 async def test_non_corotine_ainit():
     with pytest.raises(TypeError):
 
-        class _(AsyncClassStore):
+        class _(AsyncObject):
             def __ainit__(self):
                 pass
 
 
 async def test_async_class_task_store():
-    class Sample(AsyncClassStore):
+    class Sample(AsyncObject):
         async def __ainit__(self):
             self.future = self.create_future()
             self.task = self.create_task(asyncio.sleep(3600))
@@ -138,7 +138,7 @@ async def test_async_class_task_store():
 
 
 async def test_async_class_inherit_from():
-    class Parent(AsyncClassStore):
+    class Parent(AsyncObject):
         pass
 
     class Child(Parent):
@@ -158,7 +158,7 @@ async def test_async_class_inherit_from():
 async def test_await_redeclaration():
     with pytest.raises(TypeError):
 
-        class _(AsyncClassStore):
+        class _(AsyncObject):
             def __await__(self):
                 pass
 
@@ -166,7 +166,7 @@ async def test_await_redeclaration():
 async def test_close_uninitialized(loop):
     future = asyncio.Future()
 
-    class Sample(AsyncClassStore):
+    class Sample(AsyncObject):
         async def __ainit__(self, *args, **kwargs):
             await future
 
@@ -196,7 +196,7 @@ def callback_with_raise():
 
 @pytest.mark.parametrize("callback", [callback_regular, callback_with_raise])
 async def test_close_callabacks(callback):
-    class Sample(AsyncClassStore):
+    class Sample(AsyncObject):
         pass
 
     instance = await Sample()
@@ -208,7 +208,7 @@ async def test_close_callabacks(callback):
 
 
 async def test_del():
-    class Sample(AsyncClassStore):
+    class Sample(AsyncObject):
         pass
 
     instance = await Sample()
@@ -219,7 +219,7 @@ async def test_del():
 
 
 async def test_del_child():
-    class Parent(AsyncClassStore):
+    class Parent(AsyncObject):
         pass
 
     class Child(Parent):
@@ -246,7 +246,7 @@ async def test_del_child():
 
 
 async def test_link_init():
-    class Parent(AsyncClassStore):
+    class Parent(AsyncObject):
         pass
 
     class Child(Parent):
@@ -274,7 +274,7 @@ async def test_link_init():
 
 
 async def test_close_non_initialized():
-    class Sample(AsyncClassStore):
+    class Sample(AsyncObject):
         pass
 
     sample = Sample()
@@ -282,7 +282,7 @@ async def test_close_non_initialized():
 
 
 async def task_decorator():
-    class Sample(AsyncClassStore):
+    class Sample(AsyncObject):
         @task
         async def sleep(self, *args):
             return await asyncio.sleep(*args)
