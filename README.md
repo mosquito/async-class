@@ -12,10 +12,10 @@ Example
 ```python
 
 import asyncio
-from async_class import AsyncClass
+from async_class import AsyncClassStore
 
 
-class MyAsyncClass(AsyncClass):
+class MyAsyncClass(AsyncClassStore):
     async def __ainit__(self):
         future = self.create_future()
         self.loop.call_soon(future.set_result, True)
@@ -78,10 +78,10 @@ Base class with task store instance and helpers for simple task management.
 ```python
 
 import asyncio
-from async_class import AsyncClass
+from async_class import AsyncClassStore
 
 
-class MyClass(AsyncClass):
+class MyClass(AsyncClassStore):
     def __ainit__(self):
         self.task = self.create_task(asyncio.sleep(3600))
 
@@ -105,14 +105,13 @@ AsyncClassBase
 Is a base wrapper with metaclass has no additional methods and properties like
 `self.loop` and `TaskStore` related helpers (`self.create_task`, `self.create_future`).
 
-
 ```python
 
 import asyncio
-from async_class import AsyncClassBase
+from async_class import AsyncClass
 
 
-class MyAsyncClass(AsyncClassBase):
+class MyAsyncClass(AsyncClass):
     async def __ainit__(self):
         loop = asyncio.get_event_loop()
         future = loop.create_future()

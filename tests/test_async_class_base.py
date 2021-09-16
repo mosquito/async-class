@@ -1,9 +1,9 @@
 import asyncio
 
-from async_class import AsyncClassBase
+from async_class import AsyncClass
 
 
-class GlobalInitializedClass(AsyncClassBase):
+class GlobalInitializedClass(AsyncClass):
     pass
 
 
@@ -15,11 +15,11 @@ async def test_global_initialized_instance(loop):
 
 
 async def test_simple():
-    await AsyncClassBase()
+    await AsyncClass()
 
 
 async def test_simple_class():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         async def __ainit__(self):
@@ -35,7 +35,7 @@ async def test_simple_class():
 
 
 async def test_simple_inheritance():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         async def __ainit__(self):
@@ -57,7 +57,7 @@ async def test_simple_inheritance():
 
 
 async def test_simple_with_init():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         def __init__(self):
@@ -78,7 +78,7 @@ async def test_simple_with_init():
 
 
 async def test_simple_with_init_inheritance():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         def __init__(self):
