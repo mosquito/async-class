@@ -5,29 +5,21 @@ async-class
    :target: https://coveralls.io/github/mosquito/async-class?branch=master
    :alt: Coveralls
 
-.. image:: https://img.shields.io/pypi/status/async-class.svg
-   :target: https://github.com/mosquito/async-class
-   :alt: Status
+.. image:: https://img.shields.io/pypi/l/async-class
+   :target: https://pypi.org/project/async-class
+   :alt: License
 
-.. image:: https://github.com/mosquito/async-class/workflows/tox/badge.svg
-   :target: https://github.com/mosquito/async-class/actions?query=workflow%3Atox
+.. image:: https://github.com/mosquito/async-class/workflows/tests/badge.svg
+   :target: https://github.com/mosquito/async-class/actions?query=workflow%3Atests
    :alt: Build status
 
-.. image:: https://img.shields.io/pypi/v/async-class.svg
+.. image:: https://img.shields.io/pypi/wheel/async-class
    :target: https://pypi.python.org/pypi/async-class/
-   :alt: Latest Version
+   :alt: Wheel
 
-.. image:: https://img.shields.io/pypi/wheel/async-class.svg
-   :target: https://pypi.python.org/pypi/async-class/
-
-.. image:: https://img.shields.io/pypi/pyversions/async-class.svg
-   :target: https://pypi.python.org/pypi/async-class/
-
-.. image:: https://img.shields.io/pypi/l/async-class.svg
-   :target: https://github.com/mosquito/async-class/blob/master/LICENSE.md
-
-.. image:: https://img.shields.io/github/workflow/status/mosquito/async-class/Python%20package
-   :target: https://github.com/mosquito/async-class/actions?query=workflow%3A%22Python+package%22
+.. image:: https://img.shields.io/pypi/v/async-class
+   :target: https://pypi.org/project/async-class
+   :alt: Latest version
 
 Adding abillity to write classes with awaitable initialization function.
 
