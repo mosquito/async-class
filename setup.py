@@ -10,7 +10,7 @@ setup(
     packages=["."],
     project_urls={"Source": "https://github.com/mosquito/async-class"},
     classifiers=[
-        "License :: OSI Approved :: Apache Software License",
+        "License :: OSI Approved :: MIT License",
         "Topic :: Internet",
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries",

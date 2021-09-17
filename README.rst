@@ -30,50 +30,50 @@ Usage example
 =============
 
 .. code:: python
+    :name: test_simple
+
+    import asyncio
+    from async_class import AsyncClass, AsyncObject, task, link
 
 
-   import asyncio
-   from async_class import AsyncClass, AsyncObject, task, link
+    class MyAsyncClass(AsyncClass):
+         async def __ainit__(self):
+              # Do async staff here
+              pass
 
 
-   class MyAsyncClass(AsyncClass):
-       async def __ainit__(self):
-           # Do async staff here
-           pass
+    class MainClass(AsyncObject):
+         async def __ainit__(self):
+              # Do async staff here
+              pass
+
+         async def __adel__(self):
+              """ This method will be called when object will be closed """
+              pass
 
 
-   class MainClass(AsyncObject):
-       async def __ainit__(self):
-           # Do async staff here
-           pass
-
-       async def __adel__(self):
-           """ This method will be called when object will be closed """
-           pass
+    class RelatedClass(AsyncObject):
+         async def __ainit__(self, parent: MainClass):
+              link(self, parent)
 
 
-   class RelatedClass(AsyncObject):
-       async def __ainit__(self, parent: MainClass):
-           link(self, parent)
+    async def main():
+         instance = await MyAsyncClass()
+         print(instance)
 
+         main_instance = await MainClass()
+         related_instance = await RelatedClass(main_instance)
 
-   async def main():
-       instance = await MyAsyncClass()
-       print(instance)
+         assert not main_instance.is_closed
+         assert not related_instance.is_closed
 
-       main_instance = await MainClass()
-       related_instance = await RelatedClass(main_instance)
+         await main_instance.close()
+         assert main_instance.is_closed
 
-       assert not main_instance.is_closed
-       assert not related_instance.is_closed
+         # will be closed because linked to closed main_instance
+         assert related_instance.is_closed
 
-       await main_instance.close()
-       assert main_instance.is_closed
-
-       # will be closed because linked to closed main_instance
-       assert related_instance.is_closed
-
-   asyncio.run(main())
+    asyncio.run(main())
 
 
 Documentation
@@ -96,25 +96,25 @@ additional methods like ``self.create_task`` and ``self.create_future``.
 This class just solves the initialization problem:
 
 .. code:: python
+    :name: test_async_class
+
+    import asyncio
+    from async_class import AsyncClass
 
 
-   import asyncio
-   from async_class import AsyncClass
-
-
-   class MyAsyncClass(AsyncClass):
+    class MyAsyncClass(AsyncClass):
        async def __ainit__(self):
            future = self.loop.create_future()
-           self.loop.call_soon(future.set_result)
+           self.loop.call_soon(future.set_result, True)
            await future
 
 
-   async def main():
+    async def main():
        instance = await MyAsyncClass()
        print(instance)
 
+    asyncio.run(main())
 
-   asyncio.run(main())
 
 Class ``AsyncObject``
 -------------------------
@@ -123,18 +123,18 @@ Base class with task store instance and helpers for simple task
 management.
 
 .. code:: python
+    :name: test_async_object
+
+    import asyncio
+    from async_class import AsyncObject
 
 
-   import asyncio
-   from async_class import AsyncObject
-
-
-   class MyClass(AsyncObject):
-       def __ainit__(self):
+    class MyClass(AsyncObject):
+       async def __ainit__(self):
            self.task = self.create_task(asyncio.sleep(3600))
 
 
-   async def main():
+    async def main():
        obj = await MyClass()
 
        assert not obj.task.done()
@@ -144,7 +144,8 @@ management.
        assert obj.task.done()
 
 
-   asyncio.run(main())
+    asyncio.run(main())
+
 
 Class ``TaskStore``
 -------------------
@@ -158,12 +159,13 @@ Also, a task store might create a linked copy of the self, which will be
 closed when the parent instance will be closed.
 
 .. code:: python
+    :name: test_tasK_store
 
-   import asyncio
-   from async_class import TaskStore
+    import asyncio
+    from async_class import TaskStore
 
 
-   async def main():
+    async def main():
        store = TaskStore(asyncio.get_event_loop())
 
        task1 = store.create_task(asyncio.sleep(3600))
@@ -176,4 +178,4 @@ closed when the parent instance will be closed.
        assert task1.done() and task2.done()
 
 
-   asyncio.run(main())
+    asyncio.run(main())
