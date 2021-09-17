@@ -68,7 +68,7 @@ Usage example
        assert not related_instance.is_closed
 
        await main_instance.close()
-       assert not main_instance.is_closed
+       assert main_instance.is_closed
 
        # will be closed because linked to closed main_instance
        assert related_instance.is_closed
