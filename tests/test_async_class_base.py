@@ -1,16 +1,25 @@
 import asyncio
 
-import pytest
+from async_class import AsyncClass
 
-from async_class import AsyncClassBase
+
+class GlobalInitializedClass(AsyncClass):
+    pass
+
+
+global_initialized_instance = GlobalInitializedClass()
+
+
+async def test_global_initialized_instance(loop):
+    await global_initialized_instance
 
 
 async def test_simple():
-    await AsyncClassBase()
+    await AsyncClass()
 
 
 async def test_simple_class():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         async def __ainit__(self):
@@ -26,7 +35,7 @@ async def test_simple_class():
 
 
 async def test_simple_inheritance():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         async def __ainit__(self):
@@ -48,7 +57,7 @@ async def test_simple_inheritance():
 
 
 async def test_simple_with_init():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         def __init__(self):
@@ -69,7 +78,7 @@ async def test_simple_with_init():
 
 
 async def test_simple_with_init_inheritance():
-    class Sample(AsyncClassBase):
+    class Sample(AsyncClass):
         event = asyncio.Event()
 
         def __init__(self):
@@ -91,11 +100,3 @@ async def test_simple_with_init_inheritance():
     assert Sample.event.is_set()
     assert MySample.event.is_set()
     assert instance.value == 3
-
-
-async def test_await_redeclaration():
-    with pytest.raises(TypeError):
-
-        class _(AsyncClassBase):
-            def __await__(self):
-                pass

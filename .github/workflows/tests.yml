@@ -1,0 +1,89 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - python: '3.9'
+            toxenv: mypy
+            os: ubuntu-latest
+
+          - python: '3.9'
+            toxenv: pylava
+            os: ubuntu-latest
+
+          - python: '3.9'
+            toxenv: checkdoc
+            os: ubuntu-latest
+
+          - python: '3.6'
+            toxenv: py36
+            os: ubuntu-latest
+          - python: '3.7'
+            toxenv: py37
+            os: ubuntu-latest
+          - python: '3.8'
+            toxenv: py38
+            os: ubuntu-latest
+          - python: '3.9'
+            toxenv: py39
+            os: ubuntu-latest
+
+          - python: '3.6'
+            toxenv: py36
+            os: macos-latest
+          - python: '3.7'
+            toxenv: py37
+            os: macos-latest
+          - python: '3.8'
+            toxenv: py38
+            os: macos-latest
+          - python: '3.9'
+            toxenv: py39
+            os: macos-latest
+
+          - python: '3.6'
+            toxenv: py36
+            os: windows-latest
+          - python: '3.7'
+            toxenv: py37
+            os: windows-latest
+          - python: '3.8'
+            toxenv: py38
+            os: windows-latest
+          - python: '3.9'
+            toxenv: py39
+            os: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Install tox
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+        TOXENV: ${{ matrix.toxenv }}
+      run: pip install tox wheel
+
+    - name: Tests
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+        FORCE_COLOR: yes
+        TOXENV: ${{ matrix.toxenv }}
+      run: tox

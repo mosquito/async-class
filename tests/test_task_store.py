@@ -1,12 +1,10 @@
 import asyncio
 
-import pytest
-
 from async_class import TaskStore
 
 
 async def test_store_close(loop):
-    store = TaskStore()
+    store = TaskStore(loop)
     task1 = store.create_task(asyncio.sleep(3600))
     future1 = store.create_future()
 
@@ -27,13 +25,8 @@ async def test_store_close(loop):
 
     future3.set_result(True)
 
-    await asyncio.sleep(0.1)
-
     await store.close()
     assert store.is_closed
-
-    with pytest.raises(asyncio.InvalidStateError):
-        await store.close()
 
     for f in (future1, future2):
         assert isinstance(f.exception(), asyncio.CancelledError)
